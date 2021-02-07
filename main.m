@@ -20,7 +20,7 @@ info_my = findAllBlankPos(grid);
 
 %initialization
 numOfMembers = 450;                          % size of population
-numOfCycles = 10000;
+numOfCycles = 100000;
 intervalOfMigration = 100;
 global numOfPools;
 numOfPools = 9;
@@ -109,10 +109,16 @@ end
 bestOne = pools{where,3};
 grid
 newGrid = fillIn(bestOne,info_my)
-[~, debug] = check(newGrid)
+
+if globalMinOfFit(end) ~= 0
+[~, debug] = check(newGrid)        
+end
 
 figure
 plot(globalMinOfFit)
+title('Evolution')
+xlabel('Generations')
+ylabel('Fitness function')
 
 function pools = migrate(pools)
 [sizeOfMigrationPart, ~] = size(pools{2,5});
