@@ -1,28 +1,23 @@
-function fit = fitness(pop,info)
-
-[numOfMembers, ~] = size(pop);
-    fit = zeros(1,numOfMembers);
-    for i=1:numOfMembers
-        member = fillIn(pop(i,:), info);
-        fit(i) = check(member);
-    end
-end
-
-function [fine] = check(member)
+function [fine, debug] = check(member)
     fine = 0;   %initial
     sequences = parse(member);
+    debug = {};
+    
     for i = 1:9
-        fine = validate(member(i,:),fine);      %Row Check
-        fine = validate(member(:,i),fine);      %Col Check
-        fine = validate(sequences(i,:),fine);   %Little Grid Check
+        [fine,debugR] = validate(member(i,:),fine,{'Row';i});      %Row Check
+        [fine,debugC] = validate(member(:,i),fine,{'Col';i});      %Col Check
+        [fine,debugLG] = validate(sequences(i,:),fine,{'LG';i});   %Little Grid Check
+        debug = [debug,debugR,debugC,debugLG];
     end
 end
 
-function [fine] = validate(sequence, fine)
+function [fine, debug] = validate(sequence, fine, cellInfo)
+debug = {};
     for number = 1:9
         all = sum(sequence == number);
         if all > 1
             fine = fine + all - 1;
+            debug = [cellInfo;{number;all-1}];
         end
     end
 end

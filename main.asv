@@ -109,7 +109,6 @@ end
 bestOne = pools{where,3};
 grid
 newGrid = fillIn(bestOne,info_my)
-[~, debug] = check(newGrid)
 
 figure
 plot(globalMinOfFit)
