@@ -9,7 +9,7 @@ bestOne = pools{where,3};
 grid
 newGrid = fillIn(bestOne,info_my)
 else
-    load('druhy')
+    load('results2')
     grid
     newGrid = fillIn(Best,info_my)
     globalMinOfFit = grafFit;

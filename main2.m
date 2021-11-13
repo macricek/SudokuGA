@@ -18,22 +18,17 @@ grid = [3, 0, 6, 5, 0, 8, 4, 0, 0;
         0, 0, 5, 2, 0, 6, 3, 0, 0];
     
 numOfUnknown = sum(sum(grid == 0));
-vector = fillUnknown(grid);
+[vector,k] = fillUnknown(grid);
 info_my = findAllBlankPos(grid);
 pop = repmat(vector,numOfMembers,1);
 fit = fitness(pop,info_my);
 grafFit = zeros(1,numCycle);
 minFit = min(fit);
 for i=1:numCycle
-    Best = selbest(pop,fit,1);              % jeden najlepsi                                        [1]
-    NewPop = repmat(vector,9,1);           % vyber 9 najlepsich                              [9]
-    SortPop = seltourn(pop,fit,20);          % prva pracovna populacia                              [20]
-    WorkPop = selsort(pop,fit,20);           % druha pracovna populacia                              [20]
-                                                                                                   %[50]
-    SortPop = swapgen(SortPop,0.2);         %vymenenie poradia 10% sanca
-    WorkPop = swappart(WorkPop,0.15);       %poriadne casti, 8%sanca
+    Best = selbest(pop,fit,1); 
+    newPop = processGenetic(pop,fit,k);                    
     
-    pop = [SortPop;NewPop;WorkPop;Best];     %spojenie do jedneho
+    pop = [newPop;Best];     
     fit = fitness(pop,info_my);
     [minFitnew,indx]=min(fit);          %zistenie minima
         
@@ -45,15 +40,53 @@ for i=1:numCycle
     grafFit(i)=minFit;                      %graffit uchova najlepsie hodnoty jednotlivych cyklov
     if minFit == 0
         grafFit = grafFit(1:i);
+        save('results3','Best','grafFit','grid','info_my');
         break
     end
 end
 
-function vector = fillUnknown(grid)
+function newPop = processGenetic(pop, fit, k)
+    TournPop = seltourn(pop,fit,4);          
+    TournPop = swappart(TournPop,0.25);
+    
+    NewPop = selsort(pop,fit,25);    
+    WorkPop = seltourn(pop,fit,20);  
+    minFit = min(fit);
+    sanca = 0.05*minFit;
+    if sanca < 0.1
+        sanca = 0.1;
+    end
+    if sanca > 0.6
+        sanca = 0.6;
+    end
+    pocet = length(k);
+    idx_start = 1;
+    idx_end = 0;
+    NewPop1 = [];
+    WorkPop1 = [];
+    
+    for i=1:pocet
+        %temp = [];
+        idx_end = idx_end + k(i);
+        temp = NewPop(:,idx_start:idx_end);
+        temp = swapgen(temp, sanca);
+        NewPop1 = [NewPop1, temp];
+        %temp = [];
+        temp = WorkPop(:,idx_start:idx_end);
+        temp = shake(temp, 0.1);
+        WorkPop1 = [WorkPop1, temp];
+        
+        idx_start = idx_start + k(i);
+    end
+    newPop = [TournPop;NewPop1;WorkPop1];
+end
+
+function [vector,k] = fillUnknown(grid)
 vector = [];
 for i=1:9
     row = grid(i,:); 
     [~,u] = fillRow(row);
+    k(i) = length(u);
     vector = [vector,u];
 end
 end
